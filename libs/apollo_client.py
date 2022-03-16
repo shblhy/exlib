@@ -104,7 +104,7 @@ class ApolloClient(object):
         self._hash: Dict = {}
         if cache_file_path is None:
             self._cache_file_path = os.path.join(
-                os.path.abspath(os.path.dirname(__file__)), "config"
+                os.path.abspath(os.path.dirname(__file__)), "local_apollo"
             )
         else:
             self._cache_file_path = cache_file_path

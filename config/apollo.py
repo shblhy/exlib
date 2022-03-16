@@ -37,8 +37,8 @@ class ApolloConfig(Config):
             return parsers[format](r)
         return r if r is not value else value
 
-    def __init__(self, app_id, server, auth):
-        self.namespace = 'quant.dev'
+    def __init__(self, app_id, server, auth, namespace='application'):
+        self.namespace = namespace
         self.client = ApolloClient(app_id=app_id,
                                    config_server_url=server,
                                    authorization=auth)
