@@ -26,6 +26,8 @@ def get_value(name, format='str', value=None):
 
 
 class ApolloConfig(Config):
+    apollo_keys = []    # 设置在阿波罗的key必须进行登记
+
     def _get_value(self, name, format='str', value=None):
         r = self.client.get_value(name, namespace=self.namespace)
         parsers = {
@@ -37,7 +39,7 @@ class ApolloConfig(Config):
             return parsers[format](r)
         return r if r is not value else value
 
-    def __init__(self, app_id, server, auth, namespace='application'):
+    def __init__(self, app_id, server, auth=None, namespace='application'):
         self.namespace = namespace
         self.client = ApolloClient(app_id=app_id,
                                    config_server_url=server,
@@ -58,3 +60,10 @@ class ApolloConfig(Config):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.client.stopped = True
+
+    @property
+    def apollo_attrs(self):
+        return [k.split('__')[0] if '__' in k else k for k in self.apollo_keys]
+
+    def get_apollo_data(self):
+        return {k: getattr(self, k) for k in self.apollo_attrs}
