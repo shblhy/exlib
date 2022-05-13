@@ -27,10 +27,10 @@ class Config:
 
     def setup_engine(self):
         for engine in self._engines:
-            e = engine()
+            e = engine() if isinstance(engine, type) else engine
             e.init(self)    # 初始化引擎
             e.setup(self)
-            self._engines_[engine.__name__] = e
+            self._engines_[e._name] = e
 
     def get_all_property_keys(self):
         keys = []
@@ -98,3 +98,9 @@ class ConfigEngine:
             else:
                 format = 'str'
             setattr(config.__class__, key, get_property(key, format, engine=self))
+
+    @property
+    def _name(self):
+        if hasattr(self, 'name'):
+            return self.name
+        return self.__class__.__name__
