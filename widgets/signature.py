@@ -1,7 +1,7 @@
 import hmac
 import hashlib
+import json
 from functools import wraps
-from flask import request
 from werkzeug.exceptions import Unauthorized
 
 
@@ -17,7 +17,7 @@ class Signature:
 
     @classmethod
     def get_key(cls, key):
-        return dict(cls.items)[key]
+        return json.loads(cls.items).get(key)
 
     @classmethod
     def gen_signature(cls, action, secret_id, timestamp):
@@ -27,7 +27,7 @@ class Signature:
             (cls.identify_keys[1], timestamp),
         ]
         identify_str = "&".join(["%s=%s" % (k, v) for k, v in identify])
-        secret_key = cls.get_key(secret_id)
+        secret_key = cls.get_key(secret_id).encode("utf-8")
         return hmac.new(secret_key, identify_str.encode('utf-8'), hashlib.sha1).hexdigest()
 
     @classmethod
@@ -41,8 +41,8 @@ class Signature:
             """基于以上鉴权的装饰器方法"""
 
             @wraps(func)
-            def decorated_view(*args, **kwargs):
-                identify = request.environ.get('HTTP_IDENTIFY', '')
+            def decorated_view(request, *args, **kwargs):
+                identify = request.META.get('HTTP_IDENTIFY', '')
                 try:
                     dic = dict([i.split('=') for i in identify.split('&')])
                     if not signature_cls.check_right(**dic):
@@ -52,6 +52,7 @@ class Signature:
                 return func(*args, **kwargs)
 
             return decorated_view
+
         return program_authentication_required
 
     @classmethod
@@ -61,8 +62,8 @@ class Signature:
                 project, action = params
 
                 @wraps(func)
-                def decorated_view(*args, **kwargs):
-                    identify = request.environ.get('HTTP_IDENTIFY', '')
+                def decorated_view(request, *args, **kwargs):
+                    identify = request.META.get('HTTP_IDENTIFY', '')
                     try:
                         dic = dict([i.split('=') for i in identify.split('&')])
                         if project != dic.get('secret_id'):
@@ -73,7 +74,7 @@ class Signature:
                             raise Unauthorized(description='signature failed:' + str(dic))
                     except Exception as e:
                         raise Unauthorized(description='signature failed:' + str(e))
-                    return func(*args, **kwargs)
+                    return func(request, *args, **kwargs)
 
                 return decorated_view
 
