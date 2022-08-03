@@ -21,8 +21,7 @@ class Config:
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "_instance"):
-            if not hasattr(cls, "_instance"):
-                cls._instance = object.__new__(cls)
+            cls._instance = object.__new__(cls)
         return cls._instance
 
     def setup_engine(self):
@@ -104,3 +103,6 @@ class ConfigEngine:
         if hasattr(self, 'name'):
             return self.name
         return self.__class__.__name__
+
+    def _get_value(self, name):
+        raise NotImplemented
