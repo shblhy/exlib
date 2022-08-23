@@ -17,6 +17,11 @@ class Signature:
 
     @classmethod
     def get_key(cls, key):
+        """
+        cls实例化对象
+        item ：json后的字典
+        key: secret_id
+        """
         return json.loads(cls.items).get(key)
 
     @classmethod
