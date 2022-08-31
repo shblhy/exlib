@@ -56,7 +56,7 @@ def parse(r, format, value):
     }
     if format in parsers:
         return parsers[format](r)
-    return r if r is not value else value
+    return r if r is not None else value
 
 
 def get_property(name, format='str', value=None, engine=None):
@@ -89,6 +89,10 @@ class ConfigEngine:
         if not hasattr(config, self.target):
             return
         keys = getattr(config, self.target)
+        datas = {}
+        if type(keys) is dict:
+            datas = keys
+            keys = list(datas.keys())
         if not keys:
             return
         for key in keys:
@@ -96,7 +100,7 @@ class ConfigEngine:
                 key, format = key.split('__')
             else:
                 format = 'str'
-            setattr(config.__class__, key, get_property(key, format, engine=self))
+            setattr(config.__class__, key, get_property(key, format, datas.get(key), engine=self))
 
     @property
     def _name(self):
