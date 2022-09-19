@@ -290,12 +290,12 @@ class ApolloClient(object):
             if r.status_code == 200 and r.content:
                 data = r.json()
                 self._cache[namespace] = json.loads(data.get("configurations", "{}"))
-                logging.getLogger(__name__).info(
-                    "Updated local cache for namespace %s release key %s: %s",
-                    namespace,
-                    data["releaseKey"],
-                    repr(self._cache[namespace]),
-                )
+                # logging.getLogger(__name__).info(
+                #     "Updated local cache for namespace %s release key %s: %s",
+                #     namespace,
+                #     data["releaseKey"],
+                #     repr(self._cache[namespace]),
+                # )
                 self._update_local_cache(
                     data.get("releaseKey", str(time.time())),
                     data.get("configurations", {}),
