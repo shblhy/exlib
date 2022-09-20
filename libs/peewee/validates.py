@@ -1,3 +1,9 @@
+"""
+    来自peewee-validates
+    改动点：1、 FloatField 的 coerce 方法
+"""
+
+
 """peewee-validates is a validator module designed to work with the Peewee ORM."""
 
 import datetime
@@ -430,7 +436,7 @@ class FloatField(Field):
 
     def coerce(self, value):
         try:
-            return float(value) if value else None
+            return float(value) if value not in ['', None] else None
         except (TypeError, ValueError):
             raise ValidationError('coerce_float')
 
