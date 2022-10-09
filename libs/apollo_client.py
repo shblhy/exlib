@@ -112,6 +112,8 @@ class ApolloClient(object):
         # for http request extension
         if self._cycle_time:
             self.start()
+        else:
+            self._long_poll()
 
     def _get_clusters(self) -> dict:
         """
