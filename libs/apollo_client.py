@@ -110,7 +110,8 @@ class ApolloClient(object):
             self._cache_file_path = cache_file_path
         self._path_checker()
         # for http request extension
-        self.start()
+        if self._cycle_time:
+            self.start()
 
     def _get_clusters(self) -> dict:
         """
