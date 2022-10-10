@@ -5,6 +5,14 @@ VERSION = '0.11'
 logger = logging.getLogger('default')
 
 
+class Item(dict):
+    def __getattr__(self, key):
+        return self[key]
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+
 class Config:
     """
         config为一份配置，可能由来自多处的数据组成，各处的数据由各自的"引擎"engine提取。
@@ -46,6 +54,15 @@ class Config:
     def get_data(self, keys=None):
         keys = keys or self.get_all_keys()
         return {k: getattr(self, k) for k in self.get_ori_keys(keys)}
+
+    def get_prefix_data(self, prefix):
+        """
+            按prefix_前缀获取数据
+        :param prefix:
+        :return:
+        """
+        data = {k.replace(f'{prefix}_', '', 1): v for k, v in self.get_data().items() if k.startswith(f'{prefix}_')}
+        return Item(**data)
 
 
 def parse(r, format, value):
