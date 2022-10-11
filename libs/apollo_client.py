@@ -41,9 +41,12 @@ class ApolloClient(object):
     since the contributors had stopped to commit code to the original repo, please submit issue or commit to https://github.com/BruceWW/pyapollo
     """
 
+    req_session = requests.Session()
+
     def __new__(cls, *args, **kwargs):
         """
         singleton model
+        todo@bruce 连接多台机器阿波罗会出错 未来修理
         """
         tmp = {_: kwargs[_] for _ in sorted(kwargs)}
         key = f"{args},{tmp}"
@@ -63,10 +66,10 @@ class ApolloClient(object):
         # namespaces: List[str] = None,
         ip: str = None,
         timeout: int = 60,
-        cycle_time: int = 300,
+        cycle_time: int = 0,
         cache_file_path: str = None,
-        authorization: str = None
-        # request_model: Optional[Any] = None,
+        authorization: str = None,
+        # request_model: Optional[Any] = None
     ):
         """
         init method
@@ -94,12 +97,13 @@ class ApolloClient(object):
             self.port = int(remote[2])
         self._authorization = authorization
 
-        self._request_model = None
+        self._request_model = ApolloClient.req_session.get
         self._cache: Dict = {}
         self._notification_map = {}
         # if namespaces is None:
         #     namespaces = ["application"]
         # self._notification_map = {namespace: -1 for namespace in namespaces}
+
         self._cycle_time = cycle_time
         self._hash: Dict = {}
         if cache_file_path is None:
@@ -113,7 +117,14 @@ class ApolloClient(object):
         if self._cycle_time:
             self.start()
         else:
-            self._long_poll()
+            try:
+                self._load_local_cache_file()
+            except:
+                self._long_poll()
+
+    def keep_long_poll(self, cycle_time=30):
+        self._cycle_time = cycle_time
+        self.start(sleep_first=True)
 
     def _get_clusters(self) -> dict:
         """
@@ -177,7 +188,7 @@ class ApolloClient(object):
         except BasicException:
             return default_val
 
-    def start(self) -> None:
+    def start(self, sleep_first=False) -> None:
         """
         Start the long polling loop.
         :return:
@@ -186,7 +197,7 @@ class ApolloClient(object):
         if len(self._cache) == 0:
             self._long_poll()
         # start the thread to get config server with schedule
-        t = threading.Thread(target=self._listener)
+        t = threading.Thread(target=self._listener, kwargs={'sleep_first':sleep_first})
         t.setDaemon(True)
         t.start()
 
@@ -343,12 +354,15 @@ class ApolloClient(object):
                     self._cache[namespace] = json.loads(f.read())["configurations"]
         return True
 
-    def _listener(self) -> None:
+    def _listener(self, sleep_first=False) -> None:
         """
 
         :return:
         """
         while True:
             logging.getLogger(__name__).info("Entering listener loop...")
+            if sleep_first:
+                time.sleep(self._cycle_time)
             self._long_poll()
-            time.sleep(self._cycle_time)
+            if not sleep_first:
+                time.sleep(self._cycle_time)
