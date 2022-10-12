@@ -40,7 +40,6 @@ class ApolloClient(object):
     thanks for the contributors
     since the contributors had stopped to commit code to the original repo, please submit issue or commit to https://github.com/BruceWW/pyapollo
     """
-
     req_session = requests.Session()
 
     def __new__(cls, *args, **kwargs):
@@ -66,10 +65,10 @@ class ApolloClient(object):
         # namespaces: List[str] = None,
         ip: str = None,
         timeout: int = 60,
-        cycle_time: int = 0,
+        cycle_time: int = 300,
         cache_file_path: str = None,
-        authorization: str = None,
-        # request_model: Optional[Any] = None
+        authorization: str = None
+        # request_model: Optional[Any] = None,
     ):
         """
         init method
@@ -103,7 +102,6 @@ class ApolloClient(object):
         # if namespaces is None:
         #     namespaces = ["application"]
         # self._notification_map = {namespace: -1 for namespace in namespaces}
-
         self._cycle_time = cycle_time
         self._hash: Dict = {}
         if cache_file_path is None:
@@ -188,7 +186,7 @@ class ApolloClient(object):
         except BasicException:
             return default_val
 
-    def start(self, sleep_first=False) -> None:
+    def start(self) -> None:
         """
         Start the long polling loop.
         :return:
@@ -197,7 +195,7 @@ class ApolloClient(object):
         if len(self._cache) == 0:
             self._long_poll()
         # start the thread to get config server with schedule
-        t = threading.Thread(target=self._listener, kwargs={'sleep_first':sleep_first})
+        t = threading.Thread(target=self._listener)
         t.setDaemon(True)
         t.start()
 
@@ -354,15 +352,12 @@ class ApolloClient(object):
                     self._cache[namespace] = json.loads(f.read())["configurations"]
         return True
 
-    def _listener(self, sleep_first=False) -> None:
+    def _listener(self) -> None:
         """
 
         :return:
         """
         while True:
             logging.getLogger(__name__).info("Entering listener loop...")
-            if sleep_first:
-                time.sleep(self._cycle_time)
             self._long_poll()
-            if not sleep_first:
-                time.sleep(self._cycle_time)
+            time.sleep(self._cycle_time)
