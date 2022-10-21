@@ -61,7 +61,12 @@ class Config:
         :param prefix:
         :return:
         """
-        data = {k.replace(f'{prefix}_', '', 1): v for k, v in self.get_data().items() if k.startswith(f'{prefix}_')}
+        keys = self.get_all_keys()
+        data = {}
+        for k in self.get_ori_keys(keys):
+            if k.startswith(f'{prefix}_'):
+                data[k.replace(f'{prefix}_', '', 1)] = getattr(self, k)
+        # data = {k.replace(f'{prefix}_', '', 1): v for k, v in self.get_data().items() if k.startswith(f'{prefix}_')}
         return Item(**data)
 
 
