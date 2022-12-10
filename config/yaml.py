@@ -4,16 +4,14 @@ from exlib.config.base import ConfigEngine
 
 
 class YamlEngine(ConfigEngine):
-    from_file = 'yaml_conf_file'
     target = 'yaml_keys'
 
-    def __init__(self, name, from_file='yaml_conf_file', target='yaml_keys'):
+    def __init__(self, name, yaml_path, target='yaml_keys'):
         self.name = name
-        self.from_file = from_file
+        self.yaml_path = yaml_path
         self.target = target
 
     def init(self, conf):
-        self.yaml_path = getattr(conf, self.from_file)
         self._last_yml_time_ = None
 
     @property
