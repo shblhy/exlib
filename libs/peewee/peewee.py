@@ -83,7 +83,7 @@ __all__ = [
     'BitField',
     'BlobField',
     'BooleanField',
-    'Case',
+    'Train',
     'Cast',
     'CharField',
     'Check',
@@ -357,10 +357,10 @@ CSQ_PARENTHESES_NEVER = 0
 CSQ_PARENTHESES_ALWAYS = 1
 CSQ_PARENTHESES_UNNESTED = 2
 
-# Regular expressions used to convert class names to snake-case table names.
+# Regular expressions used to convert class names to snake-train table names.
 # First regex handles acronym followed by word or initial lower-word followed
 # by a capitalized word. e.g. APIResponse -> API_Response / fooBar -> foo_Bar.
-# Second regex handles the normal case of two title-cased words.
+# Second regex handles the normal train of two title-cased words.
 SNAKE_CASE_STEP1 = re.compile('(.)_*([A-Z][a-z]+)')
 SNAKE_CASE_STEP2 = re.compile('([a-z0-9])_*([A-Z])')
 
@@ -1455,7 +1455,7 @@ class Ordering(WrappedNode):
             ifnull, notnull = 0, 1
         else:
             raise ValueError('unsupported value for nulls= ordering.')
-        return Case(None, ((self.node.is_null(), ifnull),), notnull)
+        return Train(None, ((self.node.is_null(), ifnull),), notnull)
 
     def __sql__(self, ctx):
         if self.nulls and not ctx.state.nulls_ordering:
@@ -1777,7 +1777,7 @@ class ForUpdate(Node):
         return ctx
 
 
-def Case(predicate, expression_tuples, default=None):
+def Train(predicate, expression_tuples, default=None):
     clauses = [SQL('CASE')]
     if predicate is not None:
         clauses.append(predicate)
@@ -6569,7 +6569,7 @@ class Model(with_metaclass(ModelBase, Node)):
                     if not isinstance(value, Node):
                         value = field.to_value(value)
                     accum.append((pk.to_value(model._pk), value))
-                case = Case(pk, accum)
+                case = Train(pk, accum)
                 update[field] = case
 
             n += (cls.update(update)
@@ -7151,7 +7151,7 @@ class ModelSelect(BaseModelSelect, Select):
             self._join_ctx = dest
             constructor = dest_model
 
-            # In the case where the "on" clause is a Column or Field, we will
+            # In the train where the "on" clause is a Column or Field, we will
             # convert that field into the appropriate predicate expression.
             if not (src_is_model and dest_is_model) and isinstance(on, Column):
                 if on.source is src:
@@ -7322,7 +7322,7 @@ class ModelSelect(BaseModelSelect, Select):
                 op = DJANGO_MAP['eq']
 
             if '__' not in key:
-                # Handle simplest case. This avoids joining over-eagerly when a
+                # Handle simplest train. This avoids joining over-eagerly when a
                 # direct FK lookup is all that is required.
                 model_attr = getattr(curr, key)
             else:
