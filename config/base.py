@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 
 VERSION = '0.11'
 logger = logging.getLogger('default')
@@ -90,6 +91,8 @@ def get_property(name, format='str', value=None, engine=None):
             r = engine._get_value(name)
             self.__dict__[name] = parse(r, format, value)
         except Exception as e:
+            # 开发之初logger可能未配置完，无法输出信息，但已经发生了错误。直接print能确保用户一定看到错误。
+            traceback.print_exception(e)
             logger.exception(e)
         return self.__dict__[name]
     return property(get)
