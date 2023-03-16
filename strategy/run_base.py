@@ -2,7 +2,6 @@ import os
 import sys
 import argparse
 import pickle
-from config import conf
 from datetime import datetime
 
 """
@@ -29,13 +28,21 @@ def expand(user_params):
 def get_parser(params):
     sys.argv.pop()
     parser = argparse.ArgumentParser()
+    parser.add_argument('--t', default=datetime.now().strftime('%Y%m%d%H%M%S'), required=False)
     for k, v in params:
         parser.add_argument(k, **v)
     return parser
 
 
 class StraBase:
-    source_dir = conf.source_dir
+    def __init__(self, tag_id, source_dir):
+        """
+
+        :param tag_id: 用一个id来区分多次运行的日志等
+        :param source_dir: 源内容
+        """
+        self.tag_id = tag_id
+        self.source_dir = source_dir
 
     def reset(self):
         raise NotImplemented
