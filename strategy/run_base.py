@@ -16,21 +16,10 @@ from datetime import datetime
 #  python xxx.py --episode=11
 
 
-def expand(user_params):
-    params = []
-    for k, v in user_params.items():
-        _values = {'default': v}
-        item = [f'--{k}', _values]
-        params.append(item)
-    return params
-
-
-def get_parser(params):
-    sys.argv.pop()
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--t', default=datetime.now().strftime('%Y%m%d%H%M%S'), required=False)
-    for k, v in params:
-        parser.add_argument(k, **v)
+def get_parser():
+    parser = argparse.ArgumentParser(description='请输入参数')
+    parser.add_argument('-t', '--tag_id', default=datetime.now().strftime('%Y%m%d%H%M%S'), required=False)
+    parser.add_argument('-e', '--episode', type=int, default=3, required=False)
     return parser
 
 
